@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Quran</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
+    <style>
+        @import url(https://fonts.googleapis.com/earlyaccess/amiri.css);
+        .amiri { font-family: 'Amiri', serif; }
+        body { background: linear-gradient(to right, #64b5f6, #1976d2); font-family: 'Roboto', sans-serif; }
+        .list-group-item { background-color: rgba(255, 255, 255, 0.9); border: none; border-radius: 10px; margin-bottom: 10px; transition: transform 0.2s; }
+        .list-group-item:hover { background-color: rgba(255, 255, 255, 0.95); transform: scale(1.02); }
+        #text-arabic { background-color: rgba(255, 255, 255, 0.95); border-radius: 10px; padding: 20px; min-height: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .ayah { margin-bottom: 20px; }
+        .ayah .list-group { background-color: rgba(248, 249, 250, 0.95); padding: 15px; border-radius: 10px; }
+        .ayah .list-group a { color: #007bff; text-decoration: none; }
+        .ayah .list-group a:hover { text-decoration: underline; }
+        footer { background: #3f51b5; color: #fff; }
+        .search-box, .ayah-dropdown { position: relative; margin-bottom: 20px; }
+        .search-box input { width: calc(100% - 40px); padding: 10px; border-radius: 20px; border: none; background-color: rgba(255, 255, 255, 0.9); transition: all 0.3s ease; }
+        .search-box input:focus { outline: none; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .search-box i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #555; transition: all 0.3s ease; }
+        .search-box i:hover { color: #007bff; cursor: pointer; }
+        .ayah-dropdown select { width: calc(100% - 20px); padding: 10px; border-radius: 20px; border: none; background-color: rgba(255, 255, 255, 0.9); transition: all 0.3s ease; }
+        .ayah-dropdown select:focus { outline: none; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .ayah .list-group .teks-latin { color: #28a745; } /* Warna hijau untuk teks Latin */
+        .favorite-icon { color: #ffc107; transition: color 0.3s ease; }
+        .favorite-icon:hover { color: #ffca28; cursor: pointer; }
+        .surah-link { transition: all 0.3s ease; }
+        .surah-link:hover { transform: translateY(-2px); }
+        .quote-container { margin-top: 20px; text-align: center; }
+        .quote { font-size: 20px; color: #fff; font-style: italic; }
+        .moving-image-container { margin-top: 20px; text-align: center; }
+        .moving-image { width: 200px; height: auto; }
+    </style>
+</head>
+<body>
+    <div class="container p-4">
+        <div class="ayah-dropdown shadow p-3 mb-4 bg-white rounded d-none" id="ayah-dropdown-box">
+            <select id="ayah-select" class="form-select">
+                <option value="">Pilih Ayat...</option>
+            </select>
+            <select id="qari-select" class="form-select mt-3">
+                <option value="">Pilih qari...</option>
+                <option value="abdul_basit_mujawwad">Abdul Basit Mujawwad</option>
+                <option value="abdurrahman_as_sudais">Abdurrahman As-Sudais</option>
+                <option value="muhammad_ayyub">Muhammad Ayyub</option>
+            </select>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <main id="maincontent" class="content">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="search-box shadow p-3 mb-4 bg-white rounded">
+                        <input type="text" id="search-input" placeholder="Cari Surah..." />
+                        <i class="fa fa-search"></i>
+                    </div>
+                    <div class="list-group shadow p-3 mb-5 bg-white rounded" id="daftar-surah"></div>
+                    <h5 class="mb-3">Surah Favorit</h5>
+                    <div class="list-group shadow p-3 bg-white rounded" id="daftar-favorit"></div>
+                </div>
+                <div class="col-md-8">
+                    <div class="shadow p-3 mb-5 bg-white rounded" id="text-arabic">
+                        <p class="text-muted">Silakan klik daftar surah</p>
+                    </div>
+                    <div class="quote-container">
+                        <p class="quote" id="quote">"Tidak ada kekuatan dan kekuasaan kecuali dengan pertolongan Allah"</p>
+                    </div>
+                    <div class="moving-image-container">
+                        <img class="moving-image" src="data:image/jpeg;base64,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" alt="Gambar Agamis">
+                    </div>                                  
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer class="text-center py-3 mt-5">&copy; myquran</footer>
+    <script>
+        const BASE_URL = "https://equran.id/api/v2";
+        let suratList = [];
+        let ayatList = [];
+        let favoritSurah = [];
+
+        const addToFavorites = (nomorSurah) => {
+            const favoriteIcon = document.querySelector(`#favorite-${nomorSurah}`);
+            if (!favoritSurah.includes(nomorSurah)) {
+                favoritSurah.push(nomorSurah);
+                favoritefavoriteIcon.classList.add('text-warning');
+            } else {
+                favoritSurah = favoritSurah.filter(nomor => nomor !== nomorSurah);
+                favoriteIcon.classList.remove('text-warning');
+            }
+            localStorage.setItem('favoritSurah', JSON.stringify(favoritSurah));
+        };
+
+        const quranSurah = async () => {
+            const endpoint = `${BASE_URL}/surat`;
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            suratList = data.data;
+            displaySurahList(suratList);
+        };
+
+        const quranDetail = async (nomor) => {
+            const endpoint = `${BASE_URL}/surat/${nomor}`;
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            return data.data;
+        };
+
+        let surahVisitCount = {};
+
+        const displaySurahList = (surat) => {
+            const daftarSurah = document.querySelector("#daftar-surah");
+            daftarSurah.innerHTML = "";
+
+            if (Object.keys(surahVisitCount).length === 0) {
+                surat.forEach((surah) => {
+                    surahVisitCount[surah.nomor] = 0;
+                });
+            }
+
+            surat.sort((a, b) => surahVisitCount[b.nomor] - surahVisitCount[a.nomor]);
+
+            surat.forEach((surah) => {
+                const list = `<a href="#" class="list-group-item list-group-item-action" id="surah-${surah.nomor}">
+                                ${surah.nomor} - ${surah.namaLatin} (${surah.nama}) <i class="fa fa-star ms-2 text-warning" id="favorite-${surah.nomor}" onclick="addToFavorites('${surah.nomor}')"></i>
+                            </a>`;
+                daftarSurah.insertAdjacentHTML("beforeend", list);
+
+                document.querySelector(`#surah-${surah.nomor}`).addEventListener("click", function (event) {
+                    event.preventDefault();
+                    document.querySelector(`#text-arabic`).innerHTML = "";
+                    document.querySelector("#ayah-dropdown-box").classList.remove("d-none");
+                    quranDetail(surah.nomor).then((ayat) => {
+                        ayatList = ayat.ayat;
+                        displayAyatList(ayatList);
+                        populateAyahDropdown(ayatList);
+                        surahVisitCount[surah.nomor]++;
+                    });
+                });
+            });
+        };
+
+        const populateAyahDropdown = (ayat) => {
+            const ayahSelect = document.querySelector("#ayah-select");
+            ayahSelect.innerHTML = '<option value="">Pilih Ayat...</option>';
+            ayat.forEach((ayah) => {
+                const option = `<option value="${ayah.nomorAyat}">Ayat${ayah.nomorAyat}</option>`;
+                ayahSelect.insertAdjacentHTML("beforeend", option);
+            });
+
+            ayahSelect.addEventListener("change", function () {
+                const selectedAyat = this.value;
+                if (selectedAyat) {
+                    const ayatToDisplay = ayatList.filter(ayah => ayah.nomorAyat == selectedAyat);
+                    displayAyatList(ayatToDisplay);
+                } else {
+                    displayAyatList(ayatList);
+                }
+            });
+        };
+
+        const displayAyatList = (ayat) => {
+            const textArabic = document.querySelector("#text-arabic");
+            textArabic.innerHTML = '';
+            ayat.forEach((ayah) => {
+                const ayatElem = `<div class="ayah row">
+                                    <div class="col-md-11">
+                                        <div class="list-group shadow-sm fs-3 text-end amiri" title="${ayah.teksIndonesia}">
+                                            ${ayah.teksArab}
+                                        </div>
+                                        <div class="list-group shadow-sm mt-2 fs-6 text-start teks-latin">
+                                            <p>${ayah.teksLatin}</p>
+                                        </div>
+                                        <div class="list-group shadow-sm mt-2 fs-6 text-start">
+                                            <p>${ayah.teksIndonesia}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <div class="list-group shadow-sm fs-3 text-center">
+                                            <a href="${ayah.audio['01']}" target="_blank">${ayah.nomorAyat}</a>
+                                            <button class="btn btn-primary btn-sm mt-2" onclick="playAudio('${ayah.audio['01']}')">
+                                                <i class="fa fa-play"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>`;
+                textArabic.insertAdjacentHTML("beforeend", ayatElem);
+            });
+        };
+
+        const playAudio = (audioUrl) => {
+            const audio = new Audio(audioUrl);
+            audio.play();
+        };
+
+        document.querySelector("#search-input").addEventListener("input", function () {
+            const query = this.value.toLowerCase();
+            const filteredSurat = suratList.filter(surah => surah.namaLatin.toLowerCase().includes(query) || surah.nama.toLowerCase().includes(query));
+            displaySurahList(filteredSurat);
+        });
+
+        quranSurah();
+    </script>
+</body>
+</html>
+
